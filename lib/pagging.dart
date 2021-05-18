@@ -1,5 +1,5 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_solve_paging/appoment_status_model.dart';
 import 'package:flutter_solve_paging/booking_history_wating_status.dart';
 import 'package:flutter_solve_paging/provider_get_status.dart';
 import 'package:provider/provider.dart';
@@ -10,54 +10,44 @@ class ListViewPage extends StatefulWidget {
   _ListViewPageState createState() => _ListViewPageState();
 }
 
-class _ListViewPageState extends State<ListViewPage> {
-  //int skip = 1;
+GlobalKey _contentKey = GlobalKey();
+GlobalKey _refesherKey = GlobalKey();
 
+class _ListViewPageState extends State<ListViewPage> {
   RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
-  List<AppomentStatusModel> data = List();
-  GlobalKey _contentKey = GlobalKey();
-  GlobalKey _refesherKey = GlobalKey();
-  List<AppomentStatusModel> list;
+  RefreshController(initialRefresh: false);
+
+  static const int take = 4;
 
   @override
   Widget build(BuildContext context) {
 
     void _onRefresh() async {
       print("_onRefresh");
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(Duration(milliseconds: 1000));
 
-      list = Provider.of<ProviderGetStatus>(context, listen: false)
-          .fetchStatusPage(
-          take: 2,
+      Provider.of<ProviderGetStatus>(context, listen: false).clearData();
+
+      Provider.of<ProviderGetStatus>(context, listen: false).fetchStatusPage(
+          take: take,
           skip: Provider.of<ProviderGetStatus>(context, listen: false)
               .items
-              .length) as List;
+              .length);
 
-      data.clear();
-      // Provider.of<ProviderGetStatus>(context, listen: false).items.clear() ;
-      // skip = 1;
-      data.addAll(list);
-      // Provider.of<ProviderGetStatus>(context, listen: false).items.addAll(list);
-      setState(() {
-        _refreshController.refreshCompleted();
-      });
+      // setState(() {
+      _refreshController.refreshCompleted();
+      //});
     }
 
     void _onLoading() async {
       print("_onLoading");
-      // skip += 2;
-      list = Provider.of<ProviderGetStatus>(context, listen: false)
-          .fetchStatusPage(
-              take: 2,
-              skip: Provider.of<ProviderGetStatus>(context, listen: false)
-                  .items
-                  .length) as List;
-      data.addAll(list);
-      await Future.delayed(Duration(seconds: 2));
-      setState(() async {
-        _refreshController.loadComplete();
-      });
+      Provider.of<ProviderGetStatus>(context, listen: false).fetchStatusPage(
+          take: take,
+          skip: Provider.of<ProviderGetStatus>(context, listen: false)
+              .items
+              .length);
+      await Future.delayed(Duration(milliseconds: 1000));
+      _refreshController.loadComplete();
     }
 
     return Scaffold(
@@ -69,19 +59,40 @@ class _ListViewPageState extends State<ListViewPage> {
         key: _refesherKey,
         enablePullUp: true,
         enablePullDown: true,
-       // physics: BouncingScrollPhysics(),
-        footer: ClassicFooter(
-          loadStyle: LoadStyle.ShowWhenLoading,
+        header: WaterDropHeader(),
+        footer: CustomFooter(
+          builder: (BuildContext context, LoadStatus mode) {
+            Widget body;
+            if (mode == LoadStatus.idle) {
+              body = Text("pull up load");
+            } else if (mode == LoadStatus.loading) {
+              body = CupertinoActivityIndicator();
+            } else if (mode == LoadStatus.failed) {
+              body = Text("Load Failed!Click retry!");
+            } else if (mode == LoadStatus.canLoading) {
+              body = Text("release to load more");
+            } else {
+              body = Text("No more Data");
+            }
+            return Container(
+              height: 55.0,
+              child: Center(child: body),
+            );
+          },
         ),
+//        physics: BouncingScrollPhysics(),
+//        footer: ClassicFooter(
+//          loadStyle: LoadStyle.ShowWhenLoading,
+//        ),
         onRefresh: _onRefresh,
         onLoading: _onLoading,
         child: FutureBuilder(
           future: Provider.of<ProviderGetStatus>(context, listen: false)
               .fetchStatusPage(
-                  take: 2,
-                  skip: Provider.of<ProviderGetStatus>(context, listen: false)
-                      .items
-                      .length), // Provider.of<ProviderGetStatus>(context).items.length
+              take: take,
+              skip: Provider.of<ProviderGetStatus>(context, listen: false)
+                  .items
+                  .length),
           builder: (context, AsyncSnapshot snapShot) {
             switch (snapShot.connectionState) {
               case ConnectionState.waiting:
@@ -91,58 +102,52 @@ class _ListViewPageState extends State<ListViewPage> {
                 return Center(child: CircularProgressIndicator());
                 break;
               case ConnectionState.none:
-                //  todo  handel error
-                return Text("ConnectionState error");
+              //  todo  handel error
+                return Text("ConnectionState Error");
                 break;
               case ConnectionState.done:
                 if (snapShot.hasError) {
-                  //  snapShot.error != null
-                  // todo  handel error data
-                  return Text("ConnectionState error");
+                  return Text("ConnectionState Error");
                 } else {
                   final productsData =
                       Provider.of<ProviderGetStatus>(context).items;
-                  //print("length");
-                  //print(productsData);
-                  //print(productsData.length);
+
                   if (productsData.length == 0) {
-                    //print("I am in NO dATA");
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Center(
-                            child:  Text("No Data")),
+                            child:   Text("No Data")),
                       ],
                     );
                   } else {
-                    //print("I am in FavoriteGrid");
                     final productsStatus =
                         Provider.of<ProviderGetStatus>(context).items;
                     return Padding(
                       padding: const EdgeInsets.all(10),
                       child: Container(
                           child: ListView.builder(
-                        key: _contentKey,
-                        scrollDirection: Axis.vertical,
-                        physics: BouncingScrollPhysics(),
-                        itemBuilder: (context, position) {
-                          return Container(
-                            child: ChangeNotifierProvider.value(
-                              value: productsStatus[position],
-                              child: buildBookingHistoryWaitingStatus(
-                                  context, Color(0xff07c83a)),
-                            ),
-                          );
-                        },
-                        itemCount: productsStatus.length,
-                      )),
+                            key: _contentKey,
+                            scrollDirection: Axis.vertical,
+                            physics: BouncingScrollPhysics(), //  BouncingScrollPhysics
+                            itemBuilder: (context, position) {
+                              return Container(
+                                child: ChangeNotifierProvider.value(
+                                  value: productsStatus[position],
+                                  child: buildBookingHistoryWaitingStatus(
+                                      context, Color(0xff07c83a)),
+                                ),
+                              );
+                            },
+                            itemCount: productsStatus.length,
+                          )),
                     );
                   }
                 }
                 break;
               default:
-                return Text("ConnectionState error");
+                return Text("ConnectionState Error");
             }
           },
         ),

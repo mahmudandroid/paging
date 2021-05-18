@@ -61,4 +61,10 @@ class ProviderGetStatus with ChangeNotifier {
     notifyListeners();
   }
 
+  void clearData(){
+    _item.clear() ;
+    // _item = [] ;
+    notifyListeners();
+  }
+
 }

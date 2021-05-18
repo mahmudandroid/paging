@@ -78,13 +78,7 @@ class _buildBookingHistoryWaitingStatusState
                           : Container(
                               //width: 240,
                               height: 24,
-                              decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(4)),
-                                  border: Border.all(
-                                      color: const Color(0xffc77070),
-                                      width: 1),
-                                  color: const Color(0xffffffff)),
+//
                               child: Padding(
                                 padding: const EdgeInsets.only(
                                   left: 10,
@@ -92,7 +86,7 @@ class _buildBookingHistoryWaitingStatusState
                                 ),
                                 child: Center(
                                   child: Text(
-                                       'cancellation',
+                                       '-',
                                       style: const TextStyle(
                                           color: Colors.black,
                                           fontWeight: FontWeight.w800,

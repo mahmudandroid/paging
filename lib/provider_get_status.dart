@@ -21,7 +21,7 @@ class ProviderGetStatus with ChangeNotifier {
   Future<void> fetchStatusPage({int take ,int skip} ) async {
 
     Header header = new Header();
-    var mheader = header.getHeaderToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI5MWRkNjVlMC0zOGJlLTRkMWMtOGFkYy1mZDE2NmU1YjBlYzEiLCJ1bmlxdWVfbmFtZSI6IjA5NjE2Njg2NjYiLCJyb2xlIjoiUGF0aWVudCIsIm5iZiI6MTYyMDk0Mjk0MiwiZXhwIjoxNjIxNTQ3NzQyLCJpYXQiOjE2MjA5NDI5NDJ9.ns5CSnZcODTcKV2bQL7DD8lGRLqhl8V7_ULZHiEoNiI');
+    var mheader = header.getHeaderToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI5MWRkNjVlMC0zOGJlLTRkMWMtOGFkYy1mZDE2NmU1YjBlYzEiLCJ1bmlxdWVfbmFtZSI6IjA5NjE2Njg2NjYiLCJyb2xlIjoiUGF0aWVudCIsIm5iZiI6MTYyMTI5MDgxMywiZXhwIjoxNjIxODk1NjEzLCJpYXQiOjE2MjEyOTA4MTN9.xIxRv-FuI8_B-IDBqSEh_9yfiU-gIVkm7RvTbqJAl9E');
 
     String url = "http://cliprzh-001-site2.ftempurl.com/api/Appoment/1/1";
     print("url");
